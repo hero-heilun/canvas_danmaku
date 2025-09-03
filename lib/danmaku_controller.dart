@@ -1,5 +1,8 @@
+import 'package:flutter/material.dart';
 import 'models/danmaku_option.dart';
 import '/models/danmaku_content_item.dart';
+import 'models/danmaku_item.dart';
+import 'danmaku_interaction.dart';
 
 class DanmakuController {
   final Function(DanmakuContentItem) onAddDanmaku;
@@ -7,6 +10,10 @@ class DanmakuController {
   final Function onPause;
   final Function onResume;
   final Function onClear;
+  
+  // 交互相关属性
+  DanmakuInteractionManager? _interactionManager;
+  
   DanmakuController({
     required this.onAddDanmaku,
     required this.onUpdateOption,
@@ -53,5 +60,45 @@ class DanmakuController {
   /// 更新弹幕配置
   void updateOption(DanmakuOption option) {
     onUpdateOption.call(option);
+  }
+  
+  /// 设置交互管理器（内部使用）
+  void setInteractionManager(DanmakuInteractionManager manager) {
+    _interactionManager = manager;
+  }
+  
+  /// 启用/禁用交互
+  void setInteractionEnabled(bool enabled) {
+    _interactionManager?.interactionEnabled = enabled;
+  }
+  
+  /// 检查交互是否启用
+  bool get isInteractionEnabled => 
+      _interactionManager?.interactionEnabled ?? false;
+  
+  /// 设置弹幕点击回调
+  void setOnDanmakuTap(DanmakuTapCallback? callback) {
+    if (_interactionManager != null) {
+      _interactionManager!.onTap = callback;
+    }
+  }
+  
+  /// 设置弹幕长按回调
+  void setOnDanmakuLongPress(DanmakuLongPressCallback? callback) {
+    if (_interactionManager != null) {
+      _interactionManager!.onLongPress = callback;
+    }
+  }
+  
+  /// 设置弹幕双击回调
+  void setOnDanmakuDoubleTap(DanmakuDoubleTapCallback? callback) {
+    if (_interactionManager != null) {
+      _interactionManager!.onDoubleTap = callback;
+    }
+  }
+  
+  /// 获取指定位置的弹幕（用于调试或预览）
+  List<DanmakuItem> getDanmakuAt(Offset position) {
+    return _interactionManager?.getDanmakuAt(position) ?? [];
   }
 }

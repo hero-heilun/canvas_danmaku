@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
+import 'interactive_example.dart';
+
 
 import 'package:flutter/services.dart';
 
@@ -236,6 +238,15 @@ class _HomePageState extends State<HomePage> {
                   _controller.clear();
                 },
                 tooltip: 'Clear',
+              ),
+              IconButton(
+                icon: const Icon(Icons.touch_app),
+                onPressed: () {
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+                    return InteractiveDanmakuExample();
+                  }));
+                },
+                tooltip: 'Interactive Example',
               ),
             ],
           ),

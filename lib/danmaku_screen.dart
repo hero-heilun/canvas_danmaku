@@ -5,6 +5,7 @@ import 'scroll_danmaku_painter.dart';
 import 'special_danmaku_painter.dart';
 import 'static_danmaku_painter.dart';
 import 'danmaku_controller.dart';
+import 'danmaku_interaction.dart';
 import 'dart:ui' as ui;
 import 'models/danmaku_option.dart';
 import '/models/danmaku_content_item.dart';
@@ -14,10 +15,22 @@ class DanmakuScreen extends StatefulWidget {
   // 创建Screen后返回控制器
   final Function(DanmakuController) createdController;
   final DanmakuOption option;
+  
+  // 交互配置
+  final DanmakuInteractionConfig? interactionConfig;
+  
+  // 交互回调
+  final DanmakuTapCallback? onDanmakuTap;
+  final DanmakuLongPressCallback? onDanmakuLongPress;
+  final DanmakuDoubleTapCallback? onDanmakuDoubleTap;
 
   const DanmakuScreen({
     required this.createdController,
     required this.option,
+    this.interactionConfig,
+    this.onDanmakuTap,
+    this.onDanmakuLongPress,
+    this.onDanmakuDoubleTap,
     super.key,
   });
 
@@ -72,6 +85,12 @@ class _DanmakuScreenState extends State<DanmakuScreen>
 
   /// 运行状态
   bool _running = true;
+  
+  /// 交互管理器
+  late DanmakuInteractionManager _interactionManager;
+  
+  /// 视图高度
+  double _viewHeight = 0;
 
   @override
   void initState() {
@@ -86,7 +105,20 @@ class _DanmakuScreenState extends State<DanmakuScreen>
       onResume: resume,
       onClear: clearDanmakus,
     );
+    
+    // 初始化交互管理器
+    _interactionManager = DanmakuInteractionManager();
+    if (widget.interactionConfig?.enableTap ?? false) {
+      _interactionManager.onTap = widget.onDanmakuTap;
+    }
+    if (widget.interactionConfig?.enableLongPress ?? false) {
+      _interactionManager.onLongPress = widget.onDanmakuLongPress;
+    }
+    if (widget.interactionConfig?.enableDoubleTap ?? false) {
+      _interactionManager.onDoubleTap = widget.onDanmakuDoubleTap;
+    }
     _controller.option = _option;
+    _controller.setInteractionManager(_interactionManager);
     widget.createdController.call(
       _controller,
     );
@@ -119,6 +151,7 @@ class _DanmakuScreenState extends State<DanmakuScreen>
     _animationController.dispose();
     _staticAnimationController.dispose();
     _stopwatch.stop();
+    _interactionManager.dispose();
     super.dispose();
   }
 
@@ -485,6 +518,14 @@ class _DanmakuScreenState extends State<DanmakuScreen>
       if (constraints.maxWidth != _viewWidth) {
         _viewWidth = constraints.maxWidth;
       }
+      
+      // 更新视图高度
+      if (constraints.maxHeight != _viewHeight) {
+        _viewHeight = constraints.maxHeight;
+      }
+      
+      // 更新交互管理器数据
+      _updateInteractionManager();
 
       _trackCount =
           (constraints.maxHeight * _option.area / _danmakuHeight).floor();
@@ -499,10 +540,12 @@ class _DanmakuScreenState extends State<DanmakuScreen>
         _trackYPositions.add(i * _danmakuHeight);
       }
       return ClipRect(
-        child: IgnorePointer(
-          child: Opacity(
-            opacity: _option.opacity,
-            child: Stack(children: [
+        child: Stack(children: [
+          // 弹幕绘制层（保持原有的IgnorePointer）
+          IgnorePointer(
+            child: Opacity(
+              opacity: _option.opacity,
+              child: Stack(children: [
               RepaintBoundary(
                   child: AnimatedBuilder(
                 animation: _animationController,
@@ -559,10 +602,56 @@ class _DanmakuScreenState extends State<DanmakuScreen>
                   },
                 ),
               ),
-            ]),
+              ]),
+            ),
           ),
-        ),
+          // 交互层（透明的GestureDetector）
+          _buildInteractionLayer(),
+        ]),
       );
     });
   }
+  
+  /// 构建交互层
+  Widget _buildInteractionLayer() {
+    if (widget.interactionConfig == null ||
+        (!widget.interactionConfig!.enableTap &&
+         !widget.interactionConfig!.enableLongPress &&
+         !widget.interactionConfig!.enableDoubleTap)) {
+      return const SizedBox.shrink();
+    }
+    
+    return Positioned.fill(
+      child: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTapDown: widget.interactionConfig!.enableTap 
+            ? (details) => _interactionManager.handleTap(details.localPosition)
+            : null,
+        onLongPressStart: widget.interactionConfig!.enableLongPress 
+            ? (details) => _interactionManager.handleLongPress(details.localPosition)
+            : null,
+        onDoubleTapDown: widget.interactionConfig!.enableDoubleTap 
+            ? (details) => _interactionManager.handleDoubleTap(details.localPosition)
+            : null,
+        child: Container(
+          color: Colors.transparent,
+        ),
+      ),
+    );
+  }
+  
+  /// 更新交互管理器数据
+  void _updateInteractionManager() {
+    _interactionManager.updateDanmakuData(
+      scrollItems: _scrollDanmakuItems,
+      topItems: _topDanmakuItems,
+      bottomItems: _bottomDanmakuItems,
+      specialItems: _specialDanmakuItems,
+      viewWidth: _viewWidth,
+      viewHeight: _viewHeight,
+      option: _option,
+      getCurrentTick: () => _tick,
+    );
+  }
+  
 }

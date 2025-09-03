@@ -74,9 +74,39 @@ class _DanmakuPageState extends State<DanmakuPage> {
 
 `canvas_danmaku` 弹幕容器属性(字体大小/字体透明度等)可在容器运行时热更新，渲染缓存将会在发生热更新时优雅地销毁并重新生成。
 
-## 局限
+#### 交互性
 
-如前文所述，本项目绘制的弹幕本质是一段动画，而非一组小组件。故本项目绘制的弹幕不具有交互性，如果您需要点击弹幕来实现的交互操作，本项目并不能满足需求。
+`canvas_danmaku` 现在支持弹幕交互功能！通过混合渲染架构（Canvas绘制 + 透明交互层），实现了高性能的弹幕点击、长按、双击等交互操作。
+
+交互功能特性：
+- 保持原有的高性能Canvas绘制
+- 精确的弹幕命中测试
+- 支持点击、长按、双击事件
+- 可灵活配置交互行为
+- 零性能损失的智能交互检测
+
+```dart
+DanmakuScreen(
+  // ... 其他配置
+  interactionConfig: DanmakuInteractionConfig(
+    enableTap: true,
+    enableLongPress: true,
+    enableDoubleTap: false,
+  ),
+  onDanmakuTap: (event) {
+    print('点击了弹幕: ${event.danmaku.content.text}');
+  },
+  onDanmakuLongPress: (event) {
+    print('长按了弹幕: ${event.danmaku.content.text}');
+  },
+)
+```
+
+## ~~局限~~
+
+~~如前文所述，本项目绘制的弹幕本质是一段动画，而非一组小组件。故本项目绘制的弹幕不具有交互性，如果您需要点击弹幕来实现的交互操作，本项目并不能满足需求。~~
+
+**更新**: 现已支持弹幕交互功能，在保持高性能的同时实现了完整的交互体验。
 
 ## 致谢
 
