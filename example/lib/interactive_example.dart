@@ -114,26 +114,28 @@ class _InteractiveDanmakuExampleState extends State<InteractiveDanmakuExample> {
             padding: EdgeInsets.all(16),
             child: Column(
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    ElevatedButton(
-                      onPressed: _addRandomDanmaku,
-                      child: Text('添加弹幕'),
-                    ),
-                    ElevatedButton(
-                      onPressed: () => _controller.pause(),
-                      child: Text('暂停'),
-                    ),
-                    ElevatedButton(
-                      onPressed: () => _controller.resume(),
-                      child: Text('继续'),
-                    ),
-                    ElevatedButton(
-                      onPressed: () => _controller.clear(),
-                      child: Text('清空'),
-                    ),
-                  ],
+                FittedBox(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton(
+                        onPressed: _addRandomDanmaku,
+                        child: Text('添加弹幕'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () => _controller.pause(),
+                        child: Text('暂停'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () => _controller.resume(),
+                        child: Text('继续'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () => _controller.clear(),
+                        child: Text('清空'),
+                      ),
+                    ],
+                  ),
                 ),
                 SizedBox(height: 16),
                 Row(

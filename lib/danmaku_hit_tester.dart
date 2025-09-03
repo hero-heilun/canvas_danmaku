@@ -39,11 +39,11 @@ class DanmakuHitTester {
 
     // 测试顶部弹幕
     results.addAll(_testStaticDanmaku(
-      tapPosition, topItems, option, viewWidth, true, currentTick));
+      tapPosition, topItems, option, viewWidth, viewHeight, true, currentTick));
 
     // 测试底部弹幕  
     results.addAll(_testStaticDanmaku(
-      tapPosition, bottomItems, option, viewWidth, false, currentTick));
+      tapPosition, bottomItems, option, viewWidth, viewHeight, false, currentTick));
 
     // 测试特殊弹幕
     results.addAll(_testSpecialDanmaku(
@@ -92,6 +92,7 @@ class DanmakuHitTester {
     List<DanmakuItem> items,
     DanmakuOption option,
     double viewWidth,
+    double viewHeight, // Add this
     bool isTop,
     int currentTick,
   ) {
@@ -102,7 +103,7 @@ class DanmakuHitTester {
         continue;
       }
 
-      var rect = _calculateStaticDanmakuRect(item, viewWidth, isTop);
+      var rect = _calculateStaticDanmakuRect(item, viewWidth, viewHeight, isTop);
       
       if (rect != null && rect.contains(tapPosition)) {
         results.add(DanmakuHitResult(
@@ -181,14 +182,20 @@ class DanmakuHitTester {
   Rect? _calculateStaticDanmakuRect(
     DanmakuItem item,
     double viewWidth,
+    double viewHeight,
     bool isTop,
   ) {
     // 静态弹幕位置相对固定，居中显示
     double x = (viewWidth - item.width) / 2;
+    double y = item.yPosition;
+
+    if (!isTop) {
+      y = viewHeight - item.yPosition - item.height;
+    }
     
     return Rect.fromLTWH(
       x,
-      item.yPosition,
+      y,
       item.width,
       item.height,
     );
@@ -255,7 +262,7 @@ class DanmakuHitTester {
         case DanmakuItemType.top:
         case DanmakuItemType.bottom:
           itemRect = _calculateStaticDanmakuRect(
-            item, viewWidth, item.content.type == DanmakuItemType.top);
+            item, viewWidth, viewHeight, item.content.type == DanmakuItemType.top);
           break;
         case DanmakuItemType.special:
           itemRect = _calculateSpecialDanmakuRect(
