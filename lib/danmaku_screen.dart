@@ -104,6 +104,8 @@ class _DanmakuScreenState extends State<DanmakuScreen>
       onPause: pause,
       onResume: resume,
       onClear: clearDanmakus,
+      onPauseDanmaku: pauseDanmaku,
+      onResumeDanmaku: resumeDanmaku,
     );
     
     // 初始化交互管理器
@@ -422,6 +424,23 @@ class _DanmakuScreenState extends State<DanmakuScreen>
       _specialDanmakuItems.clear();
     });
     _animationController.stop();
+  }
+
+  /// 暂停指定弹幕
+  void pauseDanmaku(DanmakuItem item) {
+    if (!mounted) return;
+    setState(() {
+      item.paused = true;
+    });
+  }
+
+  /// 恢复指定弹幕
+  void resumeDanmaku(DanmakuItem item) {
+    if (!mounted) return;
+    setState(() {
+      item.paused = false;
+      item.lastDrawTick = _tick;
+    });
   }
 
   /// 确定滚动弹幕是否可以添加

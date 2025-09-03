@@ -10,6 +10,8 @@ class DanmakuController {
   final Function onPause;
   final Function onResume;
   final Function onClear;
+  final Function(DanmakuItem) onPauseDanmaku;
+  final Function(DanmakuItem) onResumeDanmaku;
   
   // 交互相关属性
   DanmakuInteractionManager? _interactionManager;
@@ -20,6 +22,8 @@ class DanmakuController {
     required this.onPause,
     required this.onResume,
     required this.onClear,
+    required this.onPauseDanmaku,
+    required this.onResumeDanmaku,
   });
 
   bool _running = true;
@@ -60,6 +64,16 @@ class DanmakuController {
   /// 更新弹幕配置
   void updateOption(DanmakuOption option) {
     onUpdateOption.call(option);
+  }
+
+  /// 暂停指定弹幕
+  void pauseDanmaku(DanmakuItem item) {
+    onPauseDanmaku.call(item);
+  }
+
+  /// 继续指定弹幕
+  void resumeDanmaku(DanmakuItem item) {
+    onResumeDanmaku.call(item);
   }
   
   /// 设置交互管理器（内部使用）

@@ -156,6 +156,14 @@ class DanmakuHitTester {
     double viewHeight,
     int currentTick,
   ) {
+    if (item.paused) {
+      return Rect.fromLTWH(
+        item.xPosition,
+        item.yPosition,
+        item.width,
+        item.height,
+      );
+    }
     // 检查弹幕是否还存活
     int elapsedTime = currentTick - item.creationTime;
     int durationMs = option.duration * 1000;

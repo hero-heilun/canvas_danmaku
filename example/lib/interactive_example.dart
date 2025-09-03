@@ -73,15 +73,17 @@ class _InteractiveDanmakuExampleState extends State<InteractiveDanmakuExample> {
                     ),
                     // 点击回调
                     onDanmakuTap: (event) {
-                      setState(() {
-                        _lastInteraction = 
-                            '点击了弹幕: \"${event.danmaku.content.text}\"\\n'
-                            '位置: (${event.position.dx.toInt()}, ${event.position.dy.toInt()})\\n'
-                            '时间: ${DateTime.now().toString().substring(11, 19)}';
-                      });
-                      
-                      // 可以在这里添加更多交互逻辑
-                      _showDanmakuInfo(event.danmaku);
+                      if (event.danmaku.paused) {
+                        _controller.resumeDanmaku(event.danmaku);
+                        setState(() {
+                          _lastInteraction = '恢复了弹幕: "${event.danmaku.content.text}"';
+                        });
+                      } else {
+                        _controller.pauseDanmaku(event.danmaku);
+                        setState(() {
+                          _lastInteraction = '暂停了弹幕: "${event.danmaku.content.text}"';
+                        });
+                      }
                     },
                     // 长按回调
                     onDanmakuLongPress: (event) {
